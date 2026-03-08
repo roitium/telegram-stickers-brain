@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const cp = require('child_process');
 const https = require('https');
-const sqlite3 = require('sqlite3');
+const Database = require('better-sqlite3');
 const { load } = require('sqlite-vec');
 
 module.exports = function(api) {
@@ -24,7 +24,7 @@ module.exports = function(api) {
   function ensureDB() {
     if (!db) {
       try {
-        db = new sqlite3.Database('/root/.cache/qmd/index.sqlite');
+        db = new Database('/root/.cache/qmd/index.sqlite', { readonly: true });
         load(db);
       } catch (e) {
         api.logger.error("[Stickers] Failed to load vector db: " + e.message);
@@ -331,7 +331,7 @@ ${caption}`;
         const embedding = await embCtx.getEmbeddingFor(params.query);
         const vecJson = JSON.stringify(Array.from(embedding.vector));
 
-        // 2. Query SQLite
+        // 2. Query SQLite using better-sqlite3
         const sql = `
           SELECT d.title, v.distance 
           FROM vectors_vec v 
@@ -340,11 +340,7 @@ ${caption}`;
           ORDER BY v.distance ASC
         `;
         
-        results = await new Promise((resolve, reject) => {
-          database.all(sql, [vecJson], (err, rows) => {
-            if (err) reject(err); else resolve(rows);
-          });
-        });
+        results = database.prepare(sql).all(vecJson);
 
         const queryDuration = Date.now() - searchStart;
         api.logger.info(`[Stickers] Search for "${params.query}" took ${queryDuration}ms`);
