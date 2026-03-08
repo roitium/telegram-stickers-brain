@@ -40,7 +40,7 @@ module.exports = function(api) {
       const { getLlama, resolveModelFile } = await import("node-llama-cpp");
       api.logger.info("[Stickers] Ensuring embedding model is available (downloading if missing)...");
       const modelPath = await resolveModelFile(
-        "hf:ggml-org/models/raw/main/embeddinggemma-300M-Q8_0.gguf",
+        "hf:ggml-org/embeddinggemma-300M-GGUF/embeddinggemma-300M-Q8_0.gguf",
         { directory: "/root/.cache/qmd/models", cli: false }
       );
       const llama = await getLlama();
