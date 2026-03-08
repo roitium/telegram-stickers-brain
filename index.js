@@ -37,12 +37,16 @@ module.exports = function(api) {
     if (embeddingContext || isModelLoading) return embeddingContext;
     isModelLoading = true;
     try {
-      const { getLlama } = await import("node-llama-cpp");
+      const { getLlama, resolveModelFile } = await import("node-llama-cpp");
+      api.logger.info("[Stickers] Ensuring embedding model is available (downloading if missing)...");
+      const modelPath = await resolveModelFile(
+        "hf:ggml-org/models/raw/main/embeddinggemma-300M-Q8_0.gguf",
+        { directory: "/root/.cache/qmd/models", cli: false }
+      );
       const llama = await getLlama();
-      const model = await llama.loadModel({
-        modelPath: "/root/.cache/qmd/models/hf_ggml-org_embeddinggemma-300M-Q8_0.gguf"
-      });
+      const model = await llama.loadModel({ modelPath });
       embeddingContext = await model.createEmbeddingContext();
+      api.logger.info("[Stickers] Lazy-loaded embeddinggemma-300M model into memory.");
     } catch (e) {
       api.logger.error("[Stickers] Failed to lazy-load embedding model: " + e.message);
     }
