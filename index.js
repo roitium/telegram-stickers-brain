@@ -95,7 +95,7 @@ module.exports = function(api) {
 
   // Helper for admin notifications
   async function notifyAdmin(text) {
-    const pCfg = api.config?.plugins?.entries?.['telegram-stickers']?.config || {};
+    const pCfg = api.config?.plugins?.entries?.['telegram-stickers-brain']?.config || {};
     const target = pCfg.notifyChatId;
     if (!target) return;
     try {
@@ -137,7 +137,7 @@ module.exports = function(api) {
           
           let caption = "无法生成描述";
           try {
-            const pCfg = api.config?.plugins?.entries?.['telegram-stickers']?.config || {};
+            const pCfg = api.config?.plugins?.entries?.['telegram-stickers-brain']?.config || {};
             const scriptPath = path.join(__dirname, "describe_sticker.js");
             const child = cp.spawnSync('node', [scriptPath, downloadUrl, prompt], {
               env: {
@@ -224,9 +224,12 @@ ${caption}`;
       
       if (!event.content || (!event.content.includes('<media:sticker>') && !event.content.includes('sticker'))) return;
 
-      const pCfg = api.config?.plugins?.entries?.['telegram-stickers']?.config || {};
+      const pCfg = api.config?.plugins?.entries?.['telegram-stickers-brain']?.config || {};
       const autoCollect = pCfg.autoCollect !== false;
-      if (!autoCollect) return;
+      if (!autoCollect) {
+        api.logger.debug("[Stickers] autoCollect is disabled, skipping message check.");
+        return;
+      }
 
       setTimeout(() => {
         try {
