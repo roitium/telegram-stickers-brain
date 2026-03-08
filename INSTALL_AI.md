@@ -1,68 +1,54 @@
-# OpenClaw Agent Installation Guide: @roitium/telegram-stickers-brain
+# OpenClaw Agent Installation & Configuration Guide: @roitium/telegram-stickers-brain
 
-This guide is designed for OpenClaw agents to automate the installation and configuration of the Telegram Stickers Brain plugin.
+This guide is designed for OpenClaw agents to fully automate the setup of the Telegram Stickers Brain plugin.
 
-## Prerequisites
-The agent must have permissions to execute shell commands and modify the `openclaw.json` configuration.
+## Phase 1: Environment Preparation
 
-## Step 1: Install System Dependencies (QMD)
-QMD is the vector search engine used by this plugin. Install it globally:
-```bash
-npm install -g @tobilu/qmd
-```
+1.  **Check Package Manager**: Determine if `bun` or `npm` is the preferred manager in the current environment (check for `bun.lockb` or `package-lock.json`).
+2.  **Install QMD**: Install the vector search engine globally using the preferred manager:
+    *   `bun install -g @tobilu/qmd` OR `npm install -g @tobilu/qmd`
 
-## Step 2: Install the Plugin
-Use the OpenClaw CLI to install the plugin:
-```bash
-openclaw plugins install @roitium/telegram-stickers-brain
-```
+## Phase 2: Plugin Installation
 
-## Step 3: Rebuild Native Bindings
-Since OpenClaw skips `postinstall` scripts for security, the `better-sqlite3` native bindings must be rebuilt manually to match the host environment:
-```bash
-cd ~/.openclaw/extensions/telegram-stickers-brain/node_modules/better-sqlite3
-npx node-gyp rebuild
-```
+1.  **Install Plugin**:
+    ```bash
+    openclaw plugins install @roitium/telegram-stickers-brain
+    ```
+2.  **Rebuild Native Bindings**: Better-sqlite3 MUST be rebuilt to match the host Node.js version:
+    ```bash
+    cd ~/.openclaw/extensions/telegram-stickers-brain/node_modules/better-sqlite3
+    npx node-gyp rebuild
+    ```
 
-## Step 4: Configure the Plugin
-Update `~/.openclaw/openclaw.json` with the following configuration under `plugins.entries["telegram-stickers-brain"].config`. 
+## Phase 3: Core Configuration (openclaw.json)
 
-**Required parameters:**
-- `vlmApiKey`: Gemini API Key for image captioning.
-- `vlmModel`: Suggested `gemini-3.1-flash-lite-preview`.
-- `autoCollect`: `false` (recommended).
-- `notifyChatId`: Your Telegram ID for sync notifications.
+1.  **Enable Sticker Actions**: Ensure Telegram sticker actions are enabled in `channels.telegram.actions.sticker`.
+2.  **Plugin Allowlist**: If `plugins.allow` exists in the configuration, add `telegram-stickers-brain` to the list.
+3.  **Find Credentials**:
+    *   Search existing config or environment variables for a valid Gemini API Key.
+    *   If not found, **ASK the user** for the API Key.
+4.  **User Preferences**:
+    *   **ASK the user** if they want to enable `autoCollect` (default: `false`).
+    *   **ASK the user** for their Telegram Chat ID to receive sync notifications (`notifyChatId`).
 
-Example:
+## Phase 4: Plugin Config Block
+
+Apply the configuration to `plugins.entries["telegram-stickers-brain"].config`:
 ```json
 {
-  "plugins": {
-    "entries": {
-      "telegram-stickers-brain": {
-        "enabled": true,
-        "config": {
-          "vlmApiKey": "YOUR_GEMINI_API_KEY",
-          "vlmModel": "gemini-3.1-flash-lite-preview",
-          "autoCollect": false,
-          "notifyChatId": "YOUR_CHAT_ID"
-        }
-      }
-    }
-  }
+  "vlmApiKey": "SEARCHED_OR_USER_PROVIDED",
+  "vlmModel": "gemini-3.1-flash-lite-preview",
+  "autoCollect": false,
+  "notifyChatId": "USER_PROVIDED_ID"
 }
 ```
 
-## Step 5: Setup Maintenance Cron
-To keep the vector index healthy, schedule a recurring task (every 12 hours):
-```bash
-openclaw cron add "0 */12 * * *" "qmd update && qmd embed" --label "stickers-maintenance"
-```
+## Phase 5: Maintenance & Verification
 
-## Step 6: Reload Gateway
-After configuration, restart the OpenClaw gateway:
-```bash
-# Run doctor first to verify config
-openclaw doctor
-# If clean, restart (requires user confirmation in active sessions)
-systemctl --user restart openclaw-gateway.service
-```
+1.  **Schedule Cron**: Add a maintenance task every 12 hours. Use the `none` delivery mode to ensure it runs silently without channel notifications:
+    *   `openclaw cron add "0 */12 * * *" "qmd update && qmd embed" --label "stickers-maintenance" --delivery none`
+2.  **Verify**: Run `openclaw doctor` to ensure the schema is valid.
+3.  **Summarize & Confirm**: 
+    *   Present a summary to the user: what was configured, which keys were used, and what preferences were set.
+    *   **Request a Gateway Restart** using Telegram Inline Buttons (success: `✅ 授权重启`, danger: `❌ 驳回`).
+    *   DO NOT restart without explicit user approval via callback.
