@@ -2,7 +2,7 @@
   "id": "telegram-stickers-brain",
   "name": "Telegram Stickers Brain",
   "description": "Semantic Telegram sticker management with VLM captioning and QMD vector indexing",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "configSchema": {
     "type": "object",
     "additionalProperties": false,
