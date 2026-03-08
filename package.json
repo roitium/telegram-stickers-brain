@@ -1,6 +1,6 @@
 {
   "name": "@roitium/telegram-stickers-brain",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "Telegram Stickers Plugin with auto-collection and load balancing",
   "main": "index.js",
   "openclaw": {
