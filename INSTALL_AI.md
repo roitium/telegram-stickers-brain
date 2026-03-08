@@ -46,7 +46,7 @@ Apply the configuration to `plugins.entries["telegram-stickers-brain"].config`:
 ## Phase 5: Maintenance & Verification
 
 1.  **Schedule Cron**: Add a maintenance task every 12 hours. Use the `none` delivery mode to ensure it runs silently without channel notifications:
-    *   `openclaw cron add "0 */12 * * *" "qmd update && qmd embed" --label "stickers-maintenance" --delivery none`
+    *   `openclaw cron add "0 */12 * * *" "qmd update && qmd embed" --label "stickers-maintenance" --no-deliver`
 2.  **Verify**: Run `openclaw doctor` to ensure the schema is valid.
 3.  **Summarize & Confirm**: 
     *   Present a summary to the user: what was configured, which keys were used, and what preferences were set.
