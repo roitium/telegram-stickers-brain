@@ -225,11 +225,14 @@ ${caption}`;
       if (!event.content || (!event.content.includes('<media:sticker>') && !event.content.includes('sticker'))) return;
 
       const pCfg = api.config?.plugins?.entries?.['telegram-stickers-brain']?.config || {};
-      const autoCollect = pCfg.autoCollect !== false;
+      const autoCollect = pCfg.autoCollect === true;
       if (!autoCollect) {
-        api.logger.debug("[Stickers] autoCollect is disabled, skipping message check.");
         return;
       }
+
+      // 必须当前消息确实包含 sticker 标记才继续
+      const hasSticker = event.content && (event.content.includes('<media:sticker>') || event.content.includes('sticker'));
+      if (!hasSticker) return;
 
       setTimeout(() => {
         try {
