@@ -1,0 +1,47 @@
+{
+  "id": "telegram-stickers",
+  "name": "Telegram Stickers Brain",
+  "description": "Semantic Telegram sticker management with VLM captioning and QMD vector indexing",
+  "version": "3.3.0",
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "vlmModel": {
+        "type": "string",
+        "default": "gemini-3.1-flash-lite-preview",
+        "description": "Model used for background sticker captioning"
+      },
+      "vlmApiKey": {
+        "type": "string",
+        "description": "Gemini API Key for VLM captioning"
+      },
+      "autoCollect": {
+        "type": "boolean",
+        "default": true,
+        "description": "Whether to automatically steal new sticker sets when seen"
+      },
+      "notifyChatId": {
+        "type": "string",
+        "description": "If set, sends a message to this Chat ID when sync starts/finishes"
+      }
+    }
+  },
+  "uiHints": {
+    "vlmApiKey": {
+      "label": "Gemini API Key",
+      "sensitive": true
+    },
+    "vlmModel": {
+      "label": "VLM Model Name",
+      "placeholder": "gemini-3.1-flash-lite-preview"
+    },
+    "autoCollect": {
+      "label": "Auto Collect New Sets"
+    },
+    "notifyChatId": {
+      "label": "Admin Chat ID (for notifications)",
+      "placeholder": "e.g. 123456789"
+    }
+  }
+}
